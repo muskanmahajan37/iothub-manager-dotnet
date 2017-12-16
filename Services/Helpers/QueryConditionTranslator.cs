@@ -22,6 +22,11 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services.Helpers
             { "IN", "IN" }
         };
 
+        private static readonly Dictionary<string, string> functionMap = new Dictionary<string, string>
+        {
+            { "E", "IS_DEFINED" }
+        };
+
         public static string ToQueryString(string conditions)
         {
             IEnumerable<QueryConditionClause> clauses = null;
@@ -46,7 +51,11 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services.Helpers
                 string op;
                 if (!operatorMap.TryGetValue(c.Operator.ToUpperInvariant(), out op))
                 {
-                    throw new InvalidInputException();
+                    if (!functionMap.TryGetValue(c.Operator.ToUpperInvariant(), out op))
+                    {
+                        throw new InvalidInputException();
+                    }
+                    return $"{op}({c.Key})";
                 }
 
                 // Reminder: string value will be surrounded by single quotation marks
